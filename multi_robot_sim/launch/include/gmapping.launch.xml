@@ -30,21 +30,21 @@
   <param name="stt" value="0.2"/>
   <param name="linearUpdate" value="0.2"/>
   <!-- <param name="laser_model_type" value="beam"/> -->
-  <param name="angularUpdate" value="0.1"/>
+  <param name="angularUpdate" value="0.3"/>
   <param name="temporalUpdate" value="-1.0"/>
   <param name="resampleThreshold" value="0.5"/>
-  <param name="particles" value="100"/>
-  <param name="xmin" value="-100"/>
-  <param name="ymin " value="-100" />
-  <param name="xmax" value="100" />
-  <param name="ymax" value="100"/>
+  <param name="particles" value="50"/>
+  <param name="xmin" value="-30"/>
+  <param name="ymin " value="-30" />
+  <param name="xmax" value="30" />
+  <param name="ymax" value="30"/>
   <!-- Increase tolerance because the computer can get quite busy -->
   <param name="delta" value="0.05"/>
   <param name="llsamplerange" value="0.01"/>
   <param name="llsamplestep" value="0.01"/>
   <param name="lasamplerange" value="0.005"/>
   <param name="lasamplestep" value="0.005"/>
-  <param name="transform_publish_period" value="0.05)"/>
+  <param name="transform_publish_period" value="0.05"/>
   <param name="occ_thresh" value="0.25"/>
   <param name="maxRange" value="10.0"/>
   <remap from="map" to="$(arg map_topic)"/>

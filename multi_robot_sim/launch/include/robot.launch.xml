@@ -7,13 +7,7 @@
 
   <arg name="init_pose" value="-x $(arg initial_pose_x) -y $(arg initial_pose_y) -z $(arg initial_pose_z) -Y $(arg initial_pose_yaw)" />
 
-  <group ns="/$(arg robot_name)/map_merge">
-    <param name="init_pose_x" value="$(arg initial_pose_x) "/>
-    <param name="init_pose_y" value="$(arg initial_pose_y)"/>
-    <param name="init_pose_z" value="$(arg initial_pose_z)"/>
-    <param name="init_pose_yaw" value="$(arg initial_pose_yaw)"/>
-  </group>
-
+ 
   <arg name="base" value="$(optenv TURTLEBOT_BASE kobuki)"/> <!--kobuki(hexagons) create(circles), roomba -->
   <arg name="battery" value="$(optenv TURTLEBOT_BATTERY /proc/acpi/battery/BAT0)"/> <!-- /proc/acpi/battery/BAT0 -->
   <arg name="stacks" value="$(optenv TURTLEBOT_STACKS hexagons)"/> <!-- circles, hexagons -->
@@ -46,7 +40,7 @@
     <param name="tf_prefix" type="string" value="$(arg robot_name)" />
   </node>
 
-  <arg name="min_range" default="0.45" />
+  <arg name="min_range" default="0.15" />
   <!-- fake laser -->
   <node pkg="nodelet" type="nodelet" name="laserscan_nodelet_manager" args="manager"/>
   <node pkg="nodelet" type="nodelet" name="depthimage_to_laserscan"
@@ -116,6 +110,18 @@
     <arg name="map_topic"    value="/$(arg robot_name)/map"/>
  </include>
 
+<!--SLam KARTO-->
+<!--include file="$(find multi_robot_sim)/launch/include/slam_karto.launch.xml">
+    <arg name ="robot_name" value="$(arg robot_name)"/>
+    <arg name="inverted_laser" value="false"/>
+    <arg name="global_frame_id" value="/map"/>
+    <arg name="map_topic"    value="/$(arg robot_name)/map"/>
+ </include-->
+
+<!--Nav2d Karto>
+<rosparam file="$(find multi_robot_sim)/param/robot_naved_karto_param.yaml" command="load" />
+<-->
+
 
 
 <!--Kobuki Random walking-->
@@ -133,9 +139,18 @@
 </node-->
 
 <!--Frontier Exploration-->
-<include file="$(find multi_robot_sim)/launch/include/exploration.launch.xml">
+<!--include file="$(find multi_robot_sim)/launch/include/exploration.launch.xml">
    <arg name ="robot_name" value="$(arg robot_name)"/>
+</include-->
+
+<!-- Ergodic Exploration-->
+<include file="$(find multi_robot_sim)/launch/include/ergodic_exploration.launch.xml">
+   <arg name ="robot_name" value="$(arg robot_name)"/>
+   <arg name="erg_frontier_topic" value="erg_frontier_info"/>
 </include>
+
+<!-- Nav2D Exploration-->
+
 
   <!--Load agent parameters-->
   <rosparam file="$(find multi_robot_sim)/param/agent_params.yaml" command="load"/>
