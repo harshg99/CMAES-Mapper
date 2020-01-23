@@ -1,0 +1,26 @@
+function plotTrajonMap(trajs,range,map,origin,resolution,k)
+map_colour=uint8(zeros(size(map,1),size(map,2),3));
+map_colour(:,:,1)=uint8(map);
+map_colour(:,:,2)=uint8(map);
+map_colour(:,:,3)=uint8(map);
+if(nargin==6)
+    for(a=1:size(trajs(k).states,2))
+        [p1,p2]=XYtoMat(origin,trajs(k).states(1,a),trajs(k).states(2,a),resolution);
+        map_colour(p1,p2,1)=255;
+        map_colour(p1,p2,2)=255;
+        map_colour(p1,p2,1)=255;
+    end
+    figure();
+    imshow(map_colour);
+    return;
+end
+    for(j=1:size(trajs,2))
+        for(a=1:size(trajs(k).states,2))
+        [p1,p2]=XYtoMat(origin,trajs(k).states(1,a),trajs(k).states(2,a),resolution);
+        map_colour(p1,p2,1)=255;
+    end
+    end
+    figure();
+    %map_colour(230,:,1)=255;
+    imshow(map_colour);
+end
