@@ -620,7 +620,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: false
       Name: Map
-      Topic: /map
+      Topic: /robot1/map
       Unreliable: false
       Use Timestamp: false
       Value: false
@@ -630,7 +630,7 @@ Visualization Manager:
       Draw Behind: false
       Enabled: false
       Name: Map
-      Topic: ""
+      Topic: /robot1/infomap
       Unreliable: false
       Use Timestamp: false
       Value: false

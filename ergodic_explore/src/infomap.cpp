@@ -43,7 +43,8 @@ namespace info_map
 
     map.header.frame_id = regions.header.frame_id;
     map.header.stamp = ros::Time::now();
-    map.info=regions.info;
+    map.info.map_load_time=ros::Time::now();
+    map.info.resolution=resolution_;
     map.info.width=size_y;
     map.info.height=size_x;
     map.info.origin.position.x=scale*regions.info.origin.position.x;
@@ -56,8 +57,8 @@ namespace info_map
       int my=j/size_x;
       int mx=j-my*size_x;
       //0.5 added to evaluate position of centre grid
-      int wx = map.info.origin.position.x + (mx + 0.5) * resolution_;
-      int wy = map.info.origin.position.y + (my + 0.5) * resolution_;
+      double wx = map.info.origin.position.x + (mx + 0.5) * resolution_;
+      double wy = map.info.origin.position.y + (my + 0.5) * resolution_;
       int size=0;
       double value=0.0;
       try{
@@ -67,7 +68,7 @@ namespace info_map
           double v_x=reg.var_x+gaussian_variance_inflation;
           double v_y=reg.var_y+gaussian_variance_inflation;
           double posterior= (1/(2*PI*sqrt(v_x)*sqrt(v_y)))
-              * exp(-1*(dist_x/(2*v_x)+dist_y/(2*v_y)));
+              * exp(-1*((dist_x/(2*v_x))+(dist_y/(2*v_y))));
           value=value+posterior;        
           size++;
       }

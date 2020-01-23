@@ -24,7 +24,8 @@
         <param name="infomap_topic" value="/$(arg robot_name)/infomap"/>
         <param name="update_frequency" value="1"/>
         <param name="gaussian_variance_inflation" value="0.1"/>
-        <param name="range" value="255"/>
+        <param name="quantisation" value="100"/>
+        <param name="scale" value="1.0"/>
     </node>
 </launch>
 
