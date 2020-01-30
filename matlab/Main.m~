@@ -35,7 +35,7 @@ imshow(costmap);
 
 %% Simulation Initialise Size
 t_step=0.1;
-sensor_rate=1.0;
+sensor_rate=
 time=70;
 stages=10;
 m_prim=20;
@@ -67,7 +67,7 @@ min_cost=zeros(stages,1);
 
 %% CE Optimisation
 for(i=1:stages)
-tic;
+    
 for(k=1:size(traj,2))
 [footprint_mat]=footprint(traj(k),sensor,size(map,1),origin2,resolution);
 footprint_mat=footprint_mat/max(max(footprint_mat));
@@ -91,12 +91,10 @@ for(m=1:size(traj,2))
         a=a+1;
     end
 end
-toc;
-tic;
+a
 [mean,variance]=getMeanVariance(vec);
 [traj,control]=sample_traj(mean,variance,samples,simPar,costmap);     
 plotTrajonMap(traj,map,origin2,resolution)
-toc;
 end
 [footprint_mat]=footprint(traj(2),sensor,size(costmap,1),origin2,resolution);
 plotTraj(traj,range,2);

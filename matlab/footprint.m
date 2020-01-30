@@ -1,5 +1,4 @@
 function [footprint_mat]=footprint(traj,sensor,dim,origin,resolution)
-
 %% Function evaluates the footprint of the robot
 % traj:  trajectory structure
 % sensor: sensor information
@@ -7,6 +6,7 @@ function [footprint_mat]=footprint(traj,sensor,dim,origin,resolution)
 % origin: origin of the map
 % resolution: map resolution
 %%
+
 
 footprint_mat=zeros(dim);
 size(traj.states,2);
