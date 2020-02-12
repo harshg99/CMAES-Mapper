@@ -26,5 +26,4 @@ while(i<=num)
         i=i+1;      
     end
 end
-k 
 end
