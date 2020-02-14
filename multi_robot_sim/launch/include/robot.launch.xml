@@ -122,7 +122,7 @@
     <arg name="map_topic"    value="/$(arg robot_name)/map"/>
  </include>
 
-<!--SLam KARTO-->
+<!--Slam KARTO-->
 <!--include file="$(find multi_robot_sim)/launch/include/slam_karto.launch.xml">
     <arg name ="robot_name" value="$(arg robot_name)"/>
     <arg name="inverted_laser" value="false"/>
