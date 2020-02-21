@@ -111,9 +111,15 @@ for(i=1:stages)
             a=a+1;
         end
     end
-    [mean,variance]=getMeanVariance(vec);
-    
-    %plotTrajonMap(traj,map,origin2,resolution)
+end
+[mean,variance]=getMeanVariance(vec);
+if(i~=1)
+    if(abs((min_cost(i)-min_cost(i-1))/min_cost(i))<0.01)
+        break;
+    end
+end
+%plotTrajonMap(traj,map,origin2,resolution)
+
 end
 toc;
 %[footprint_mat]=footprint(traj(2),sensor,size(costmap,1),origin2,resolution);

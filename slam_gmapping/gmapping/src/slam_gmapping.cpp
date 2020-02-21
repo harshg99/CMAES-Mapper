@@ -121,7 +121,7 @@ Initial map dimensions and resolution:
 #include "slam_gmapping.h"
 
 #include <iostream>
-
+#include <math.h>
 #include <time.h>
 
 #include "ros/ros.h"
@@ -251,6 +251,8 @@ void SlamGMapping::init()
     delta_ = 0.05;
   if(!private_nh_.getParam("occ_thresh", occ_thresh_))
     occ_thresh_ = 0.25;
+  if(!private_nh_.getParam("quantisation", quantisation_))
+    quantisation_=100;
   if(!private_nh_.getParam("llsamplerange", llsamplerange_))
     llsamplerange_ = 0.01;
   if(!private_nh_.getParam("llsamplestep", llsamplestep_))
@@ -271,6 +273,7 @@ void SlamGMapping::startLiveSlam()
   entropy_publisher_ = private_nh_.advertise<std_msgs::Float64>("entropy", 1, true);
   sst_ = node_.advertise<nav_msgs::OccupancyGrid>("map", 1, true);
   sstm_ = node_.advertise<nav_msgs::MapMetaData>("map_metadata", 1, true);
+  est_ = node_.advertise<nav_msgs::OccupancyGrid>("entropymap",1,true);
   ss_ = node_.advertiseService("dynamic_map", &SlamGMapping::mapCallback, this);
   scan_filter_sub_ = new message_filters::Subscriber<sensor_msgs::LaserScan>(node_, "scan", 5);
   scan_filter_ = new tf::MessageFilter<sensor_msgs::LaserScan>(*scan_filter_sub_, tf_, odom_frame_, 5);
@@ -345,8 +348,7 @@ void SlamGMapping::startReplay(const std::string & bag_fname, std::string scan_t
       }
     }
   }
-
-  bag.close();
+ bag.close();
 }
 
 void SlamGMapping::publishLoop(double transform_publish_period){
@@ -702,6 +704,15 @@ SlamGMapping::updateMap(const sensor_msgs::LaserScan& scan)
     map_.map.info.origin.orientation.y = 0.0;
     map_.map.info.origin.orientation.z = 0.0;
     map_.map.info.origin.orientation.w = 1.0;
+    
+    emap_.map.info.resolution = delta_;
+    emap_.map.info.origin.position.x = 0.0;
+    emap_.map.info.origin.position.y = 0.0;
+    emap_.map.info.origin.position.z = 0.0;
+    emap_.map.info.origin.orientation.x = 0.0;
+    emap_.map.info.origin.orientation.y = 0.0;
+    emap_.map.info.origin.orientation.z = 0.0;
+    emap_.map.info.origin.orientation.w = 1.0;
   } 
 
   GMapping::Point center;
@@ -749,7 +760,13 @@ SlamGMapping::updateMap(const sensor_msgs::LaserScan& scan)
     map_.map.info.origin.position.y = ymin_;
     map_.map.data.resize(map_.map.info.width * map_.map.info.height);
 
-    ROS_DEBUG("map origin: (%f, %f)", map_.map.info.origin.position.x, map_.map.info.origin.position.y);
+    emap_.map.info.width = smap.getMapSizeX();
+    emap_.map.info.height = smap.getMapSizeY();
+    emap_.map.info.origin.position.x = xmin_;
+    emap_.map.info.origin.position.y = ymin_;
+    emap_.map.data.resize(map_.map.info.width * map_.map.info.height);
+
+   ROS_DEBUG("map origin: (%f, %f)", map_.map.info.origin.position.x, map_.map.info.origin.position.y);
   }
 
   for(int x=0; x < smap.getMapSizeX(); x++)
@@ -760,24 +777,38 @@ SlamGMapping::updateMap(const sensor_msgs::LaserScan& scan)
       GMapping::IntPoint p(x, y);
       double occ=smap.cell(p);
       assert(occ <= 1.0);
-      if(occ < 0)
+      if(occ < 0){
         map_.map.data[MAP_IDX(map_.map.info.width, x, y)] = -1;
-      else if(occ > occ_thresh_)
+        emap_.map.data[MAP_IDX(map_.map.info.width,x, y)] = (int)round((0.5*log(0.5)+(1-0.5)*log(1-0.5))*quantisation_);
+      }
+      else if(fabs(occ-0)<=0.01)
       {
         //map_.map.data[MAP_IDX(map_.map.info.width, x, y)] = (int)round(occ*100.0);
-        map_.map.data[MAP_IDX(map_.map.info.width, x, y)] = 100;
-      }
-      else
         map_.map.data[MAP_IDX(map_.map.info.width, x, y)] = 0;
-    }
+        emap_.map.data[MAP_IDX(emap_.map.info.width, x, y)] = 0;
+      }
+      else if(fabs(occ-1)<=0.01){
+        map_.map.data[MAP_IDX(map_.map.info.width, x, y)] = quantisation_;
+        emap_.map.data[MAP_IDX(emap_.map.info.width, x, y)] = 0;
+      }
+      else{
+        map_.map.data[MAP_IDX(map_.map.info.width, x, y)] = (int)round(occ*quantisation_);
+        emap_.map.data[MAP_IDX(emap_.map.info.width, x, y)] =(int)round((occ*log(occ)+(1-occ)*log(1-occ))*quantisation_) ;
+      }
+    } 
   }
   got_map_ = true;
 
   //make sure to set the header information on the map
   map_.map.header.stamp = ros::Time::now();
   map_.map.header.frame_id = tf_.resolve( map_frame_ );
+  emap_.map.header.stamp = ros::Time::now();
+  emap_.map.header.frame_id = tf_.resolve( map_frame_ );
+ 
 
+ 
   sst_.publish(map_.map);
+  est_.publish(emap_.map);
   sstm_.publish(map_.map.info);
 }
 

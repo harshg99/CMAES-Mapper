@@ -66,6 +66,8 @@ class SlamGMapping
     ros::Publisher entropy_publisher_;
     ros::Publisher sst_;
     ros::Publisher sstm_;
+    
+    ros::Publisher est_;
     ros::ServiceServer ss_;
     tf::TransformListener tf_;
     message_filters::Subscriber<sensor_msgs::LaserScan>* scan_filter_sub_;
@@ -89,7 +91,8 @@ class SlamGMapping
 
     bool got_map_;
     nav_msgs::GetMap::Response map_;
-
+    nav_msgs::GetMap::Response emap_;
+    
     ros::Duration map_update_interval_;
     tf::Transform map_to_odom_;
     boost::mutex map_to_odom_mutex_;
@@ -139,6 +142,7 @@ class SlamGMapping
     double ymax_;
     double delta_;
     double occ_thresh_;
+    double quantisation_;
     double llsamplerange_;
     double llsamplestep_;
     double lasamplerange_;
