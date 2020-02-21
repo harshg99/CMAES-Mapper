@@ -1,11 +1,8 @@
 %% Main code for ergodic sampling
-function planner()
-
 rosinit();
-map = rossubscriber('/robot1/map');
-infomap = rossubscriber('/robot1/infomap');
-costmap= rossubscriber('/robot1/move_base/global_costmap/costmap');
+map_sub = rossubscriber('/robot1/map');
+infomap_sub = rossubscriber('/robot1/infomap');
+costmap_sub = rossubscriber('/robot1/move_base/global_costmap/costmap');
 
-traj=planner(map.LatestMessage,infomap.LatestMessage,costmap.LatestMessage);
+traj=planner(map_sub.LatestMessage,infomap_sub.LatestMessage,costmap_sub.LatestMessage);
 rosshutdown();
-end

@@ -1,11 +1,10 @@
-function [trajs,control]=sample_traj(mean,variance,num,simPar,costMap)
+function [trajs,control]=sample_traj_PRM(map,GMDist,numNodes,numTraj,origin)
 
 % Samples a trajectory parametrised on control( control tuples
 % mean: (n,1) mean vector of control
 % variance: (n,n) variance of control
-% simPar: Simualtion Parameters (start,tstep,tim)
-% origin: Origin of thee robot
-% resolution
+% origin: Origin for the map
+% GMDist: 
 %costmap for checking trajectory
 if(nargin<4)
     control=mvnrnd(mean,variance,num);
@@ -13,9 +12,14 @@ if(nargin<4)
 end
 i=1;
 k=1;
+0
+a = binaryOccupancyMap(map,1/resolution);
+rm = PRM(a,numNodes);
+rm.GMDist = GMDist;
+show(rm);
+toc;
 
-
-while(i<=num)
+while (i<=numTraj)
     samp_control=mvnrnd(mean,variance,1);
     k=k+1;
     traj=toTraj(simPar.start,samp_control,simPar.t_step,simPar.time);
@@ -28,4 +32,5 @@ while(i<=num)
         i=i+1;      
     end
 end
+
 end

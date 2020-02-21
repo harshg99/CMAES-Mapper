@@ -1,11 +1,24 @@
 %% Main code for ergodic sampling
 
-function [traj]= planner(map,infomap,costmap)
+%% Ergodic planner
+
+% Inputs
+%---------------------------------------------------
+% map: Input map message (nav_msgs/OccupancyGrid)
+% infomap: INformation map (nav_msgs/OccupancyGrid)
+% costmap: Costmap (nav_msgs/OccupancyGrid)
+function [traj]= erg_planner(map,infomap,costmap)
+
 clear all;
 close all;
 
-%%Reading Map
-%[map,infomap,costmap]=readFile('map.pgm.pgm','infomap.pgm.pgm','costmap.pgm');
+
+
+%% Reshaping data in map
+
+map_Data=reshape(map.Data,map.Info.Height,map.Info.Width);
+
+[map,infomap,costmap]=readFile('map.pgm.pgm','infomap.pgm.pgm','costmap.pgm');
 resolution=0.05;
 origin.x=-30;
 origin.y=-30;
@@ -13,10 +26,10 @@ origin.y=-30;
 % Show the files
 % figure();
 % imshow(map);
-% 
+%
 % figure();
 % imshow(infomap);
-% 
+%
 % figure();
 % imshow(costmap);
 
@@ -25,14 +38,17 @@ origin2.x=-1*range;
 origin2.y=-1*range;
 [map,infomap,costmap]=trimMap(map,infomap,costmap,range,origin,resolution);
 
-% 
+costmap(map==205)=255;
+map2=(costmap>200);
+
+%
 % figure();
 % imshow(map);
-% 
+%
 % figure();
 % imshow(infomap);
-% 
-% figure();
+%
+% figure();(
 % imshow(costmap);
 
 %% Simulation Initialise Size
@@ -70,32 +86,34 @@ tic;
 
 %% CE Optimisation
 for(i=1:stages)
-[traj,control]=sample_traj(mean,variance,samples,simPar,costmap);
-[footprint_mat]=footprint3(traj,sensor,size(map,1),origin2,resolution,sensor_rate/t_step);
-plotTrajonMap(traj,map,origin2,resolution);
-footprint_mat=footprint_mat./max(footprint_mat,[],1);
-costs=[traj.cost]+KLDiv(footprint_mat,infomap(:));%+0.00*sum(control(k,:).*control(k,:))*t_step;
-% if(cost<min_cost)
-%     min_cost=cost;
-% end
-% if(cost>max_cost)
-%     max_cost=cost;
-% end
-
-sort_costs=sort(costs);
-min_cost(i)=sort_costs(1);
-thresh= sort_costs(int32(percentile*samples));
-vec=zeros(percentile*samples,2*m_prim);
-a=1;
-for(m=1:size(traj,2))
-    if(costs(m)<=thresh & a<=percentile*samples)
-        vec(a,:)=control(m,:);
-        a=a+1;
+    tic;
+    [traj,control]=sample_traj(mean,variance,samples,simPar,costmap);
+    [footprint_mat]=footprint3(traj,sensor,size(map,1),origin2,resolution,sensor_rate/t_step);
+    plotTrajonMap(traj,map,origin2,resolution);
+    footprint_mat=footprint_mat./max(footprint_mat,[],1);
+    costs=[traj.cost]+KLDiv(footprint_mat,infomap(:));%+0.00*sum(control(k,:).*control(k,:))*t_step;
+    toc;
+    % if(cost<min_cost)
+    %     min_cost=cost;
+    % end
+    % if(cost>max_cost)
+    %     max_cost=cost;
+    % end
+    
+    sort_costs=sort(costs);
+    min_cost(i)=sort_costs(1);
+    thresh= sort_costs(int32(percentile*samples));
+    vec=zeros(percentile*samples,2*m_prim);
+    a=1;
+    for(m=1:size(traj,2))
+        if(costs(m)<=thresh & a<=percentile*samples)
+            vec(a,:)=control(m,:);
+            a=a+1;
+        end
     end
-end
-[mean,variance]=getMeanVariance(vec);
-     
-%plotTrajonMap(traj,map,origin2,resolution)
+    [mean,variance]=getMeanVariance(vec);
+    
+    %plotTrajonMap(traj,map,origin2,resolution)
 end
 toc;
 %[footprint_mat]=footprint(traj(2),sensor,size(costmap,1),origin2,resolution);
