@@ -16,9 +16,9 @@ map=map_(size(map_,1)/2-range/resolution:size(map_,1)/2+range/resolution-1,size(
 infomap=infomap_(size(map_,1)/2-range/resolution:size(map_,1)/2+range/resolution-1,size(map_,2)/2-range/resolution:size(map_,2)/2+range/resolution-1);
 costmap=costmap_(size(map_,1)/2-range/resolution:size(map_,1)/2+range/resolution-1,size(map_,2)/2-range/resolution:size(map_,2)/2+range/resolution-1);
 
-% map=rot90(map,3);
-% infomap=rot90(infomap,3);
-% costmap=rot90(costmap,3);
+map=rot90(map,3);
+infomap=rot90(infomap,3);
+costmap=rot90(costmap,3);
 % for(j=1:size(map_,1))
 %     for(k=1:size(map_,2))
 %         wx=origin.x+j*resolution;

@@ -792,7 +792,12 @@ SlamGMapping::updateMap(const sensor_msgs::LaserScan& scan)
         emap_.map.data[MAP_IDX(emap_.map.info.width, x, y)] = 0;
       }
       else{
-        map_.map.data[MAP_IDX(map_.map.info.width, x, y)] = (int)round(occ*quantisation_);
+
+        if( occ>occ_thresh_)
+          map_.map.data[MAP_IDX(map_.map.info.width, x, y)] = (int)round(quantisation_);
+        else
+          map_.map.data[MAP_IDX(map_.map.info.width, x, y)] = 0;
+
         emap_.map.data[MAP_IDX(emap_.map.info.width, x, y)] =(int)round((occ*log(occ)+(1-occ)*log(1-occ))*quantisation_) ;
       }
     } 

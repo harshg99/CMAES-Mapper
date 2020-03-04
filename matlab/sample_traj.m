@@ -1,4 +1,4 @@
-function [trajs,control]=sample_traj(mean,variance,num,simPar,costMap)
+function [trajs,control]=sample_traj(mean,variance,simPar,costMap)
 
 % Samples a trajectory parametrised on control( control tuples
 % mean: (n,1) mean vector of control
@@ -15,7 +15,7 @@ i=1;
 k=1;
 
 
-while(i<=num)
+while(i<=simPar.numTraj)
     samp_control=mvnrnd(mean,variance,1);
     k=k+1;
     traj=toTraj(simPar.start,samp_control,simPar.t_step,simPar.time);

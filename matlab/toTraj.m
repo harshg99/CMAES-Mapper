@@ -5,9 +5,10 @@ function [traj]=toTraj(start,control,t_step,time)
 % start configuration (x,y,theta)
 
 %% Initialising trajectory
-traj_.states=zeros(3,time/t_step);
-traj_.num=0;
+traj_.states=zeros(3,time/t_step+1);
+traj_.num=1;
 traj_.cost=0;
+traj_.states(:,1)=start;
 
 for k=1:size(control,1)
 for j=1:(time/t_step)

@@ -87,7 +87,7 @@ classdef RMBuild < matlab.System & nav.algs.internal.GridAccess
                     yrand = (yu-yl).*xyrand(:,2) + yl;
                 else
                     % GMDist would have values in rectangle (0,01) to (1,1)
-                    xyrand = random(gmdist);
+                    xyrand = random(gmdist,desirednodes);
                     xrand = (xu-xl).*xyrand(:,1) + xl;
                     yrand = (yu-yl).*xyrand(:,2) + yl;
                 end
