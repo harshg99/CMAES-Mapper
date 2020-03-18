@@ -148,8 +148,14 @@ for (i=1:simPar.stages)
         [traj,control]=sample_traj(mean,variance,simPar,costmap_Data);
         [footprint_mat]=footprint3(traj,simPar.sensor,size(map_Data),simPar,simPar.sensor.sensor_rate/simPar.t_step);
     elseif(mode=="PRM")
-         [traj]=sample_traj_PRM(costmap_Data,simPar);
-         [footprint_mat]=footprint3(traj,simPar.sensor,size(map_Data),simPar,1);
+        a = binaryOccupancyMap(costmap_Data,1/simPar.resolution);
+        a.GridLocationInWorld=[simPar.origin.x,simPar.origin.y];
+        rm = PRM(a,simPar.numNodes);
+        rm.ConnectionDistance=simPar.connectionDistance;
+        rm.GMDist = simPar.GMDist;
+        update(rm);
+        [traj]=sample_traj_PRM(rm,simPar);
+        [footprint_mat]=footprint3(traj,simPar.sensor,size(map_Data),simPar,1);
     end
     
     plotTrajonMap(traj,map_Data,simPar);
@@ -165,21 +171,47 @@ for (i=1:simPar.stages)
     sort_costs=sort(costs);
     min_cost(i)=sort_costs(1);
     thresh= sort_costs(int32(simPar.percentile*simPar.numTraj));
-    vec=zeros(simPar.percentile*simPar.numTraj,2*simPar.m_prim);
-    a=1;
-    
-    for(m=1:size(traj,2))
-        if(costs(m)<=thresh & a<=simPar.percentile*simPar.numTraj)
-            vec(a,:)=control(m,:);
-            a=a+1;
+    if(mode == "control") 
+        vec=zeros(simPar.percentile*simPar.numTraj,2*simPar.m_prim);
+        a=1;
+        for(m=1:size(traj,2))
+            if(costs(m)<=thresh & a<=simPar.percentile*simPar.numTraj)
+                vec(a,:)=control(m,:);
+                a=a+1;
+            end
         end
+        [mean,variance]=getMeanVariance(vec);
+    elseif (mode == "PRM")
+        vec = [];
+        a=1;
+        for(m=1:size(traj,2))
+            if(costs(m)<=thresh & a<=simPar.percentile*simPar.numTraj)
+                vec=[vec,traj(m).states(1:2,:)];
+                a=a+1;
+            end
+        end
+        %vec(1,:) = vec(1,:) / (rm.Map.XWorldLimits(2)-rm.Map.XWorldLimits(1) );
+        %vec(2,:) = vec(2,:) / (rm.Map.YWorldLimits(2)-rm.Map.YWorldLimits(1) );
+        min_optimal_clusters = 1 ;
+        max_optimal_clusters = simPar.depth ; 
+        while (min_optimal_clusters<max_optimal_clusters)
+            try
+                simPar.GMDist = fitgmdist(vec',ceil((max_optimal_clusters+min_optimal_clusters)/2));
+                min_optimal_clusters=ceil((max_optimal_clusters+min_optimal_clusters)/2);
+            catch
+                max_optimal_clusters=floor((max_optimal_clusters+min_optimal_clusters)/2);
+            end
+        end
+          figure();
+          gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(simPar.GMDist,[x0,y0]),x,y);
+          fcontour(gmPDF,[-12,12]);
     end
-    [mean,variance]=getMeanVariance(vec);
     if(i~=1)
         if(abs((min_cost(i)-min_cost(i-1))/min_cost(i))<simPar.cutoff)
             break;
         end
     end
+    
 %plotTrajonMap(traj,map,origin2,resolution)
 toc;
 end

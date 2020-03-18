@@ -24,5 +24,6 @@ end
     end
     figure();
     %map_colour(230,:,1)=255;
+    map_colour=rot90(map_colour,1);
     imshow(map_colour);
 end

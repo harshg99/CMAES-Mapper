@@ -55,13 +55,15 @@ while (i<=simPar.numTraj)
         neighbours = roadmap.EdgeList(2,roadmap.EdgeList(1,:)==current);
         neighbours = neighbours(isVisited(neighbours)==0);
         if(isempty(neighbours))
+            trajectories(:,j+1) = trajectories(:,j-1);
             current=prev_queue(length(prev_queue));
             prev_queue(length(prev_queue))=[];
         else
-            prev_queue(length(prev_queue)+1)=current;
+            prev_queue(j)=current;
             current = neighbours(int32(ceil((rand(1,1)* length(neighbours)))));
+            trajectories(:,j+1) = roadmap.NodeList(:,current);
         end
-        trajectories(:,j+1) = roadmap.NodeList(:,current);
+        
         isVisited(current)=1;
         j=j+1;
     end

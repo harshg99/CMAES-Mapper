@@ -81,13 +81,13 @@ classdef RMBuild < matlab.System & nav.algs.internal.GridAccess
             while lastind < desirednodes
 
                 % Generate random numbers between world limits
-                
-                if(isa(gmdist,'gmdistribution')==1)
+                try
+                   validateattributes(gmdist, {'gmdistribution'},"nonempty');
                     xyrand = random(gmdist,desirednodes);
-                    xrand = xyrand(:,1);
-                    yrand = xyrand(:,2);
-                else
-                    xyrand = rand(desirednodes,2);
+                    xrand = (xu-xl).*xyrand(:,1) + xl;
+                    yrand = (yu-yl).*xyrand(:,2) + yl;
+                catch
+                    yrand = rand(desirednodes,2);
                     xrand = (xu-xl).*xyrand(:,1) + xl;
                     yrand = (yu-yl).*xyrand(:,2) + yl;
                 end

@@ -34,8 +34,8 @@ namespace info_map
     ///boost::recursive_mutex mutex_t;
     //std::lock_guard<boost::recursive_mutex> lock(mutex_t);
     //Increasing the width and height of the information density map
-    int size_y=scale*regions.info.width;
-    int size_x=scale*regions.info.height;
+    int size_x=scale*regions.info.width;
+    int size_y=scale*regions.info.height;
     std::vector<signed char> map_data(size_x*size_y,0);
     double *map_data_double=new double[size_x*size_y];
 
@@ -45,8 +45,8 @@ namespace info_map
     map.header.stamp = ros::Time::now();
     map.info.map_load_time=ros::Time::now();
     map.info.resolution=resolution_;
-    map.info.width=size_y;
-    map.info.height=size_x;
+    map.info.width=size_x;
+    map.info.height=size_y;
     map.info.origin.position.x=scale*regions.info.origin.position.x;
     map.info.origin.position.y=scale*regions.info.origin.position.y;
 
