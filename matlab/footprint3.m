@@ -83,7 +83,8 @@ else
         % angle=abs(atan2d(j_c-(mod(footprint_c,2*j_c-1)+1),(footprint_c/(2*k_c-1)+1)-k_c));
     
     %toc;
-    footprint= footprint & (abs((atan2d(j_c-(mod(footprint_c,2*j_c-1)+1),(footprint_c/(2*k_c-1)+1)-k_c)-angles))<=sensor.fov);
+    footprint = footprint & (atan2d(j_c-(mod(footprint_c,2*j_c-1)+1),(footprint_c/(2*k_c-1)+1)-k_c)<=(((angles+sensor.fov)<=180).*(angles+sensor.fov) + ((angles+sensor.fov)>180).*(angles+sensor.fov-180)));
+    footprint = footprint & (atan2d(j_c-(mod(footprint_c,2*j_c-1)+1),(footprint_c/(2*k_c-1)+1)-k_c)>=(((angles-sensor.fov)>= -180).*(angles-sensor.fov) + ((angles-sensor.fov)<-180).*(angles-sensor.fov+180)));
     footprint=reshape(footprint,2*j_c-1,2*k_c-1,[]);
     %toc;
     

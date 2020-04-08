@@ -1,4 +1,5 @@
 function plotTrajonMap(trajs,map,simPar,k)
+
 map_colour=uint8(zeros(size(map,1),size(map,2),3));
 map_colour(:,:,1)=uint8(map);
 map_colour(:,:,2)=uint8(map);
@@ -24,6 +25,7 @@ end
     end
     figure();
     %map_colour(230,:,1)=255;
-    map_colour=rot90(map_colour,1);
+    
+    %map_colour=rot90(map_colour,1);
     imshow(map_colour);
 end

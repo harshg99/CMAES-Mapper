@@ -12,4 +12,9 @@ function[val,cost]= checkTraj(traj,origin,resolution,costmap)
         return;
     end
     cost=sum(cell_cost);
+    
+    x = [traj.states(1,:)];
+    y = [traj.states(2,:)];
+  
+    
 end

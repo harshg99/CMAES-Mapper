@@ -8,16 +8,13 @@ function [traj]=toTraj(start,control,t_step,time)
 traj_.states=zeros(3,time/t_step+1);
 traj_.num=1;
 traj_.cost=0;
-traj_.states(:,1)=start;
+traj_.length = 0;
+traj_.states(:,1) = start;
+x_t1 = zeros(3,1);
 
 for k=1:size(control,1)
 for j=1:(time/t_step)
-   try
     x_t=traj_.states(:,j);
-   catch
-    j;
-    size(traj_.states,2);
-   end
     %x_t1=x_t+t_step*[control(k,2*j-1)*cos(x_t(3));control(k,2*j-1)*sin(x_t(3));control(k,2*j)];
     lambda=int32(ceil(j/(time/t_step)*size(control,2)/2));
     unit_control=[control(k,2*lambda-1);control(k,2*lambda)];
@@ -37,8 +34,10 @@ for j=1:(time/t_step)
         x_t1(1)=x_t(1)+unit_control(1)/unit_control(2)*(sin(x_t1(3))-sin(x_t(3)));
         x_t1(2)=x_t(2)+unit_control(1)/unit_control(2)*(cos(x_t(3))-cos(x_t1(3)));
     end 
-    traj_.states(:,j+1)=x_t1;
-    traj_.num=traj_.num+1;
+    traj_.length = traj_.length + norm(x_t1 - x_t);
+    traj_.states(:,j+1) = x_t1;
+    traj_.num = traj_.num + 1;
+    
 end
     traj(k)=traj_;
 end

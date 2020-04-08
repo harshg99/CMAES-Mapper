@@ -28,10 +28,10 @@ elseif size(Q,1)==size(P,1)
     Q = Q./sum(Q,1);
     P = P./sum(P,1);
     temp =  abs(P.*log(P./Q));
-    temp(isnan(temp) & abs(P)<0.00000001 & abs(Q)>0.00000001)=0.0001;
+    temp(isnan(temp) & abs(P)<0.00000001 & abs(Q)>0.00000001)=0.01;
     temp(isnan(temp) & abs(P)<0.00000001 & abs(Q)<0.00000001) = 0.0;
     %temp(isnan(temp) & abs(Q-0)<0.0000001 )=0; % resolving the case when P(i)==0
     %temp(isinf(temp))=0.005;
-    temp(isinf(temp))=0.00002;
+    temp(isinf(temp))=0.002;
     dist = sum(abs(temp),1);
 end

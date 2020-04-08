@@ -1,6 +1,7 @@
 #include <ergodic_explore/frontier_search.h>
 
 #include <mutex>
+#include <limits.h>
 
 #include <costmap_2d/cost_values.h>
 #include <costmap_2d/costmap_2d.h>
@@ -75,7 +76,7 @@ std::vector<Frontier> FrontierSearch::searchFrom(geometry_msgs::Point position)
       } else if (isNewFrontierCell(nbr, frontier_flag)) {
         frontier_flag[nbr] = true;
         Frontier new_frontier = buildNewFrontier(nbr, pos, frontier_flag);
-        if (new_frontier.size * costmap_->getResolution() >=
+        if (new_frontier.size >=
             min_frontier_size_) {
           frontier_list.push_back(new_frontier);
         }
@@ -94,6 +95,65 @@ std::vector<Frontier> FrontierSearch::searchFrom(geometry_msgs::Point position)
   return frontier_list;
 }
 
+double FrontierSearch::frontierInformation(double min_x,double max_x,
+                                           double min_y,double max_y)
+{
+  double information_content = 0.0;
+
+  unsigned int x_min;
+  unsigned int y_min;
+  unsigned int x_max;
+  unsigned int y_max;
+
+  costmap_->worldToMap(min_x,min_y,x_min,y_min);
+  costmap_->worldToMap(max_x,max_y,x_max,y_max);
+  map_ = costmap_->getCharMap();
+
+
+  for (int i = x_min; i <= x_max; i++) {
+    for( int j = y_min; j<=y_max; j++) {
+      int cost = map_[costmap_->getIndex(i,j)];
+      //ROS_INFO("Cost %d",cost);
+      //can change to entropy value of cost as well to be more informative
+      if(cost == 255) {
+        information_content+=1.0;
+
+      }
+    }
+  }
+  //ROS_INFO("Information Content %lf",information_content);
+  return information_content;
+}
+
+double FrontierSearch::frontierInformation(double x,double y,double radius)
+{
+  double information_content = 0.0;
+
+  int x_min;
+  int y_min;
+  int x_max;
+  int y_max;
+
+  costmap_->worldToMapEnforceBounds(x-radius,y-radius,x_min,y_min);
+  costmap_->worldToMapEnforceBounds(x+radius,y+radius,x_max,y_max);
+  map_ = costmap_->getCharMap();
+
+
+  for (int i = x_min; i <= x_max; i++) {
+    for( int j = y_min; j<=y_max; j++) {
+      int cost = map_[costmap_->getIndex(i,j)];
+      //ROS_INFO("Cost %d",cost);
+      //can change to entropy value of cost as well to be more informative
+      if(cost == 255) {
+        information_content+=1.0;
+
+      }
+    }
+  }
+  //ROS_INFO("Information Content %lf",information_content);
+  return information_content;
+}
+
 Frontier FrontierSearch::buildNewFrontier(unsigned int initial_cell,
                                           unsigned int reference,
                                           std::vector<bool>& frontier_flag)
@@ -103,7 +163,8 @@ Frontier FrontierSearch::buildNewFrontier(unsigned int initial_cell,
   output.centroid.x = 0;
   output.centroid.y = 0;
   output.information_moment_x = 0;
-  output.information_moment_y =0 ;
+  output.information_moment_y = 0 ;
+  output.information_moment_xy = 0;
   output.size = 1;
   output.min_distance = std::numeric_limits<double>::infinity();
 
@@ -121,6 +182,14 @@ Frontier FrontierSearch::buildNewFrontier(unsigned int initial_cell,
   double reference_x, reference_y;
   costmap_->indexToCells(reference, rx, ry);
   costmap_->mapToWorld(rx, ry, reference_x, reference_y);
+
+  double x_min,x_max,y_min,y_max;
+  x_min = UINT_MAX;
+  x_max = 0;
+  y_min = UINT_MAX;
+  y_max = 0;
+
+
   while (!bfs.empty()) {
     unsigned int idx = bfs.front();
     bfs.pop();
@@ -151,6 +220,7 @@ Frontier FrontierSearch::buildNewFrontier(unsigned int initial_cell,
         //update information moment of frontier
         output.information_moment_x += (wx*wx);
         output.information_moment_y += (wy*wy);
+        output.information_moment_xy += (wx*wy);
         // determine frontier's distance from robot, going by closest gridcell
         // to robot
         double distance = sqrt(pow((double(reference_x) - double(wx)), 2.0) +
@@ -160,6 +230,15 @@ Frontier FrontierSearch::buildNewFrontier(unsigned int initial_cell,
           output.middle.x = wx;
           output.middle.y = wy;
         }
+
+        if (wx < x_min)
+          x_min =wx;
+        if (wx > x_max)
+          x_max =wx;
+        if (wy < y_min)
+          y_min =wy;
+        if (wy > y_max)
+          y_max =wy;
 
         // add to queue for breadth first search
         bfs.push(nbr);
@@ -173,8 +252,12 @@ Frontier FrontierSearch::buildNewFrontier(unsigned int initial_cell,
   //average out information moment
   output.information_moment_x /=  output.size;
   output.information_moment_y /=  output.size;
+  output.information_moment_xy /= output.size;
   output.information_moment_x -= (output.centroid.x*output.centroid.x);
   output.information_moment_y -= (output.centroid.y*output.centroid.y);
+  output.information_moment_xy -= (output.centroid.x*output.centroid.y);
+  output.information_content = frontierInformation(output.centroid.x,output.centroid.y,3);
+
   return output;
 }
 

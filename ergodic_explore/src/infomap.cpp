@@ -53,6 +53,13 @@ namespace info_map
     ROS_DEBUG("Information Map Creation Started %d %d",size_x,size_y);
     double cum_prob=0.0;
     double max_prob=-1.0;
+    double normalise = 0.0;
+
+
+    for(ergodic_explore::Regions reg : regions.data){
+        normalise += reg.weight;
+    }
+
     for(int j=0;j<size_x*size_y;j++){
       int my=j/size_x;
       int mx=j-my*size_x;
@@ -65,14 +72,15 @@ namespace info_map
       for(ergodic_explore::Regions reg : regions.data){
           double dist_x = pow((wx-reg.mean_x),2);
           double dist_y = pow((wy-reg.mean_y),2);
-          double v_x=reg.var_x+gaussian_variance_inflation;
-          double v_y=reg.var_y+gaussian_variance_inflation;
-          double posterior= (1/(2*PI*sqrt(v_x)*sqrt(v_y)))
-              * exp(-1*((dist_x/(2*v_x))+(dist_y/(2*v_y))));
+          double v_x=reg.var_x+2*gaussian_variance_inflation;
+          double v_y=reg.var_y+2*gaussian_variance_inflation;
+          double v_xy=reg.var_xy;
+          double posterior= reg.weight/ normalise *(1/(2*PI*sqrt(v_x)*sqrt(v_y)))
+          * exp(-1/(2*(v_x*v_y+v_xy*v_xy))*((dist_x*v_y)+(dist_y*v_x)-2*v_xy*(wx-reg.mean_x)*(wy-reg.mean_y)));
           value=value+posterior;        
           size++;
       }
-      if((value-max_prob)>0.0001){
+      if((value-max_prob)>0.00001){
         max_prob=value;
       }
 

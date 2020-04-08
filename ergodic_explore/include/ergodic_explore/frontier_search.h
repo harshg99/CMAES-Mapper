@@ -18,6 +18,8 @@ struct Frontier {
   geometry_msgs::Point middle;
   double information_moment_x;
   double information_moment_y;
+  double information_moment_xy;
+  double information_content;
   std::vector<geometry_msgs::Point> points;
 };
 
@@ -69,6 +71,24 @@ protected:
    */
   bool isNewFrontierCell(unsigned int idx,
                          const std::vector<bool>& frontier_flag);
+
+  /**
+   * @brief computes frontier information content
+   * @details detemrined by information content in matrix encompassing the frontier
+   *
+   * @param bounds of the frontier
+   * @return cost of the frontier
+   */
+  double frontierInformation(double min_cell,double max_x,double min_y,double max_y);
+
+  /**
+   * @brief computes frontier information content
+   * @details detemrined by information content in matrix encompassing the frontier
+   *
+   * @param bounds of the frontier
+   * @return cost of the frontier
+   */
+  double frontierInformation(double x,double y, double radius);
 
   /**
    * @brief computes frontier cost

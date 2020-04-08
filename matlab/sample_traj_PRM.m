@@ -1,4 +1,4 @@
-function [trajs]=sample_traj_PRM(rm,simPar)
+function [trajs]=sample_traj_PRM(rm,simPar,costmap)
 
 % Samples a trajectory parametrised on control( control tuples
 
@@ -38,10 +38,10 @@ for i=1:length(dist)
     % Add an edge
     roadmap.addEdge(newNodeID, nearByNodes(i), dist(i));
 end
-
-trajs.states=cell(1,simPar.depth);
-trajs.num=1;
-trajs.cost=0;
+% 
+% trajs.states=cell(1,simPar.depth);
+% trajs.num=1;
+% trajs.cost=0;
 i=0;
 
 while (i<=simPar.numTraj)
@@ -66,7 +66,7 @@ while (i<=simPar.numTraj)
         j=j+1;
     end
     i=i+1;
-    trajectories=[0 -1;1 0]*trajectories;
-    trajs(i)=toTrajPRM(trajectories,simPar);
+    %trajectories=[0 -1;1 0]*trajectories;
+    trajs(i)=toTrajPRM(trajectories,simPar,costmap);
 end
 end

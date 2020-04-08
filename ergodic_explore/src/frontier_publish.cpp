@@ -147,7 +147,7 @@ void frontier_publish::visualizeFrontiers(
     ++id;
     m.type = visualization_msgs::Marker::SPHERE;
     m.id = int(id);
-    m.pose.position = frontier.initial;
+    m.pose.position = frontier.centroid;
     // scale frontier according to its cost (costier frontiers will be smaller)
     double scale = std::min(std::abs(min_cost * 0.4 / frontier.cost), 0.5);
     m.scale.x = scale;
@@ -177,10 +177,12 @@ void frontier_publish::publish(const std::vector<frontier_exploration::Frontier>
     std::vector<ergodic_explore::Regions> regions;
     for (auto& frontier : frontiers) {
       ergodic_explore::Regions region;
+      region.weight=frontier.information_content;
       region.mean_x=frontier.centroid.x;
       region.mean_y=frontier.centroid.y;
       region.var_x=frontier.information_moment_x;
       region.var_y=frontier.information_moment_y;
+      region.var_xy=frontier.information_moment_xy;
       regions.push_back(region);
     }
     data_.header.frame_id = costmap_client_.getGlobalFrameID();
