@@ -22,7 +22,7 @@ This project focuses on the development of a method for autonomous exploration i
 7. Pass robot map topic to the matlab node which would compute a path and publishes the path to turtlebots.
 8. Launch m_explore multi_robot_mapping to merge the maps for each robot
 
-## Evalauted paths for different maps for a single robot
+## Evaluated paths for different maps for a single robot
 
 ### Path sampling via primitives
 
